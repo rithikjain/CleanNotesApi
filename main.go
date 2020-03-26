@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
 	"github.com/rithikjain/CleanNotesApi/api/handler"
 	"github.com/rithikjain/CleanNotesApi/pkg/note"
 	"github.com/rithikjain/CleanNotesApi/pkg/user"
@@ -37,10 +36,12 @@ func GetPort() string {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	/*
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	*/
 
 	db, err := dbConnect(
 		os.Getenv("dbHost"),
