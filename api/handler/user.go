@@ -85,7 +85,7 @@ func login(svc user.Service) http.Handler {
 	})
 }
 
-// Protected Function
+// Protected Request
 func userDetails(svc user.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

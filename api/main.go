@@ -6,6 +6,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"github.com/rithikjain/CleanNotesApi/api/handler"
+	"github.com/rithikjain/CleanNotesApi/pkg/note"
 	"github.com/rithikjain/CleanNotesApi/pkg/user"
 	"log"
 	"net/http"
@@ -33,15 +34,19 @@ func main() {
 	fmt.Println("Connected to DB...")
 
 	db.LogMode(true)
-	db.AutoMigrate(&user.User{})
+	db.AutoMigrate(&user.User{}, &note.Note{})
 
 	// initializing repos and services
 	userRepo := user.NewRepo(db)
+	noteRepo := note.NewRepo(db)
+
 	userSvc := user.NewService(userRepo)
+	noteSvc := note.NewService(noteRepo)
 
 	r := http.NewServeMux()
 
 	handler.MakeUserHandler(r, userSvc)
+	handler.MakeNoteHandler(r, noteSvc)
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
