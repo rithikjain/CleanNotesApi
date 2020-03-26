@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"errors"
 	"github.com/rithikjain/CleanNotesApi/pkg"
 	"golang.org/x/crypto/bcrypt"
@@ -9,11 +8,11 @@ import (
 )
 
 type Service interface {
-	Register(ctx context.Context, user *User) (*User, error)
+	Register(user *User) (*User, error)
 
-	Login(ctx context.Context, email, password string) (*User, error)
+	Login(email, password string) (*User, error)
 
-	GetUserByID(ctx context.Context, id uint) (*User, error)
+	GetUserByID(id float64) (*User, error)
 
 	GetRepo() Repository
 }
@@ -39,14 +38,14 @@ func (user *User) Validate() (bool, error) {
 	return true, nil
 }
 
-func (s *service) Register(ctx context.Context, user *User) (*User, error) {
+func (s *service) Register(user *User) (*User, error) {
 	// Validation
 	validate, err := user.Validate()
 	if !validate {
 		return nil, err
 	}
 
-	exists, err := s.repo.DoesEmailExist(ctx, user.Email)
+	exists, err := s.repo.DoesEmailExist(user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +58,12 @@ func (s *service) Register(ctx context.Context, user *User) (*User, error) {
 		return nil, err
 	}
 	user.Password = pass
-	return s.repo.Register(ctx, user)
+	return s.repo.Register(user)
 }
 
-func (s *service) Login(ctx context.Context, email, password string) (*User, error) {
+func (s *service) Login(email, password string) (*User, error) {
 	user := &User{}
-	user, err := s.repo.FindByEmail(ctx, email)
+	user, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +73,8 @@ func (s *service) Login(ctx context.Context, email, password string) (*User, err
 	return nil, pkg.ErrNotFound
 }
 
-func (s *service) GetUserByID(ctx context.Context, id uint) (*User, error) {
-	return s.repo.FindByID(ctx, id)
+func (s *service) GetUserByID(id float64) (*User, error) {
+	return s.repo.FindByID(id)
 }
 
 func (s *service) GetRepo() Repository {

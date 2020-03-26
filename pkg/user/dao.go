@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"github.com/jinzhu/gorm"
 	"github.com/rithikjain/CleanNotesApi/pkg"
 )
@@ -16,7 +15,7 @@ func NewRepo(db *gorm.DB) Repository {
 	}
 }
 
-func (r *repo) FindByID(ctx context.Context, id uint) (*User, error) {
+func (r *repo) FindByID(id float64) (*User, error) {
 	user := &User{}
 	r.DB.Where("id = ?", id).First(user)
 	if user.Email == "" {
@@ -25,7 +24,7 @@ func (r *repo) FindByID(ctx context.Context, id uint) (*User, error) {
 	return user, nil
 }
 
-func (r *repo) Register(ctx context.Context, user *User) (*User, error) {
+func (r *repo) Register(user *User) (*User, error) {
 	result := r.DB.Create(user)
 	if result.Error != nil {
 		return nil, pkg.ErrDatabase
@@ -33,7 +32,7 @@ func (r *repo) Register(ctx context.Context, user *User) (*User, error) {
 	return user, nil
 }
 
-func (r *repo) DoesEmailExist(ctx context.Context, email string) (bool, error) {
+func (r *repo) DoesEmailExist(email string) (bool, error) {
 	user := &User{}
 	if r.DB.Where("email = ?", email).First(user).RecordNotFound() {
 		return false, nil
@@ -41,7 +40,7 @@ func (r *repo) DoesEmailExist(ctx context.Context, email string) (bool, error) {
 	return true, nil
 }
 
-func (r *repo) FindByEmail(ctx context.Context, email string) (*User, error) {
+func (r *repo) FindByEmail(email string) (*User, error) {
 	user := &User{}
 	result := r.DB.Where("email = ?", email).First(user)
 

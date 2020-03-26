@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/rithikjain/CleanNotesApi/api/middleware"
 	"github.com/rithikjain/CleanNotesApi/api/view"
 	"github.com/rithikjain/CleanNotesApi/pkg/user"
 	"net/http"
@@ -22,7 +23,7 @@ func register(svc user.Service) http.Handler {
 			return
 		}
 
-		u, err := svc.Register(r.Context(), &user)
+		u, err := svc.Register(&user)
 		if err != nil {
 			view.Wrap(err, w)
 			return
@@ -59,7 +60,7 @@ func login(svc user.Service) http.Handler {
 			return
 		}
 
-		u, err := svc.Login(r.Context(), user.Email, user.Password)
+		u, err := svc.Login(user.Email, user.Password)
 		if err != nil {
 			view.Wrap(err, w)
 			return
@@ -84,8 +85,35 @@ func login(svc user.Service) http.Handler {
 	})
 }
 
+// Protected Function
+func userDetails(svc user.Service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			view.Wrap(view.ErrMethodNotAllowed, w)
+			return
+		}
+
+		claims, err := middleware.ValidateAndGetClaims(r.Context(), "user")
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+		u, err := svc.GetUserByID(claims["id"].(float64))
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "User Found",
+			"user":    u,
+		})
+	})
+}
+
 // Handlers
 func MakeUserHandler(r *http.ServeMux, svc user.Service) {
 	r.Handle("/api/user/register", register(svc))
 	r.Handle("/api/user/login", login(svc))
+	r.Handle("/api/user", middleware.Validate(userDetails(svc)))
 }
